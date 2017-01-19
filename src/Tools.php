@@ -55,6 +55,12 @@ class Tools extends BaseTools
      */
     protected $rootDir;
 
+    public static $PL_MDFe_100 = 'PL_MDFe_100';
+
+    public static $PL_MDFe_100a_NT032015 = 'PL_MDFe_100a_NT032015';
+
+    public static $PL_MDFe_300 = 'PL_MDFe_300';
+
     public function __construct($configJson = '')
     {
         parent::__construct($configJson);
@@ -954,5 +960,25 @@ class Tools extends BaseTools
             return false;
         }
         return true;
+    }
+
+    public static function validarXmlMdfe($xml, $schema)
+    {
+        $aResp = array();
+        $schem = Identify::identificar($xml, $aResp);
+        if ($schem == '') {
+            return ["Não foi possível identificar o documento"];
+        }
+
+        $xsdFile = "{$aResp['Id']}_v{$aResp['versao']}.xsd";
+        $xsdPath = implode(DIRECTORY_SEPARATOR, [dirname(__DIR__), 'schemes', $schema, $xsdFile]);
+        if (!is_file($xsdPath)) {
+            return ["O arquivo XSD {$xsdFile} não foi localizado."];
+        }
+
+        if (!ValidXsd::validar($aResp['xml'], $xsdPath)) {
+            return ValidXsd::$errors;
+        }
+        return [];
     }
 }
